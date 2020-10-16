@@ -1,37 +1,16 @@
 # Update CloudFront Origin javascript action
-*Note: This action is designed to be compatible with Spear's static-sites configuration.*
+*Note: This action is designed to be compatible within Spear's ecosystem.
 
-This action updates the CloudFront Origin for the specified project given the following branches:
-- releases/production/tag
-- releases/staging/tag
-
-...and the following distribution input:
-```
-{ 
-    "staging":"E1234567890",
-    "production": "E1234567890"
-}
-```
+It will purge all bitbucket.org:speareducation repositories from composer.json, then add https://packages.speareducation.com/composer.*
 
 ## Inputs
 
-### `distributions`
-**Required** A JSON object of the possible Distribution Ids
-
-### `originId`
-**Optional** A String signifying the Origin ID that is to be updated.
-**Default** S3-spear-static-sites
+### `apiKey`
+**Required** The API Gateway key for https://packages.speareducation.com
 
 ## Example usage
 ```
-- uses: speareducation/action-update-cloudfront-origin@master
-  env:
-    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+- uses: speareducation/action-action-setup-composer-auth@main
   with:
-    distributions: |
-    { 
-      "staging":"E1234567890",
-      "production": "E1234567890",
-      "dotco": "E1234567890"
-    }
+    apiKey: yourapikey
+```

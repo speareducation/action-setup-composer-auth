@@ -3,87 +3,17 @@
 const fs = require('fs');
 
 const apiKey = core.getInput('apiKey');
-const repoConfig = {
-    repositories: [{
-        type: "composer",
-        url: "https://packages.speareducation.com/composer",
-        options: { http: { header: [ `x-api-key: ${apiKey}` ] } }
-    }]
-}
 
-fs.writeFileSync('~/.composer/config.json', JSON.stringify(repoConfig))
+const composerContents = fs.readFileSync('composer.json').toString();
+const composerConfig = JSON.parse(composerContents);
 
+composerConfig.repositories = (composerConfig.repositories || [])
+    .filter(repo => !/bitbucket.org(:\/)speareducation/.test(repo.url))
 
-/**
- * Main handler
- */
-const handle = async () => {
+composerConfig.repositories.push({
+    type: "composer",
+    url: "https://packages.speareducation.com/composer",
+    options: { http: { header: [ `x-api-key: ${apiKey}` ] } }
+});
 
-
-
-
-
-
-
-
-    const distributions = JSON.parse(core.getInput('distributions'));
-    const originId = core.getInput('originId');
-    const project = github.context.repo.repo || null;
-    const branch = github.context.ref.replace('refs/heads/', '')
-    const environment = branch.split('/')[1] || null;
-
-    if (!distributions[environment]) {
-        console.log(`Exiting. No Distribution ID defined for '${environment}'`)
-        return;
-    }
-
-    // get old configuration
-    console.log('Fetching old Distribution')
-    const result = await cloudfront.getDistributionConfig({ Id: distributions[environment] }).promise();
-    const { ETag, DistributionConfig } = result
-    
-    // upload configuration with new OriginPath
-    // For help with this, see ./example-cloudfront-config.json
-    // or use aws-spear cloudfront get-distribution-config --id= "<DIST ID>" | tee
-    console.log('Updating Distribution');
-    console.log({ originId, project, branch })
-    const originIndex = DistributionConfig.Origins.Items.findIndex(item => item.Id === originId);
-    if (originIndex !== -1) {
-        console.log('Old Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
-        DistributionConfig.Origins.Items[originIndex].OriginPath = `/${project}/${branch}`;
-        console.log('New Origin Path', DistributionConfig.Origins.Items[originIndex].OriginPath);
-    }
-
-    const newConfig = await cloudfront.updateDistribution({
-        Id: distributions[environment],
-        IfMatch: ETag,
-        DistributionConfig,
-    }).promise();
-
-    // Wait for distribution to be marked as "Deployed",
-    await isDistributionDeployed({ Id: newConfig.Distribution.Id, ETag: newConfig.ETag })
-
-    // invalidate the cache
-    console.log('Invalidating Cache')
-    await cloudfront.createInvalidation({
-        DistributionId: distributions[environment],
-        InvalidationBatch: {
-            Paths: {
-                Quantity: 1, // must match number of entries in "Items"
-                Items: ['/*'],
-            },
-            CallerReference: branch // use release branch as invalidation reference
-        }
-    }).promise();
-
-    console.log('Done!');
-
-};
-
-
-try {
-    handle().catch(error => core.setFailed(error.message));
-} catch (error) {
-    console.error(error);
-    core.setFailed(error.message);
-}
+fs.writeFileSync('composer.json', JSON.stringify(repoConfig));
