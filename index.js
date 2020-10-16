@@ -8,7 +8,7 @@ const composerContents = fs.readFileSync('composer.json').toString();
 const composerConfig = JSON.parse(composerContents);
 
 composerConfig.repositories = (composerConfig.repositories || [])
-    .filter(repo => !/bitbucket.org(:\/)speareducation/.test(repo.url))
+    .filter(repo => !/bitbucket.org[:\/]speareducation/.test(repo.url))
 
 composerConfig.repositories.push({
     type: "composer",
