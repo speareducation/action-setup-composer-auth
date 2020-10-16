@@ -10,7 +10,9 @@ It will purge all bitbucket.org:speareducation repositories from composer.json, 
 
 ## Example usage
 ```
-- uses: speareducation/action-action-setup-composer-auth@main
+- id: composer-auth
+  name: Setup Composer Auth
+  uses: speareducation/action-setup-composer-auth@main
   with:
-    apiKey: yourapikey
+    apiKey: ${{ secrets.COMPOSER_API_KEY }}
 ```
