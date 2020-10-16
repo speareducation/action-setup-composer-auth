@@ -1,42 +1,31 @@
-const AWS = require('aws-sdk');
-const core = require('@actions/core');
-const github = require('@actions/github');
-const cloudfront = new AWS.CloudFront();
+// const core = require('@actions/core');
+// const github = require('@actions/github');
+const fs = require('fs');
 
-const sleep = (seconds) => new Promise(resolve => setTimeout(() => resolve(), seconds * 1000));
-
-/**
- * Waits for distribution to deploy
- * Throws an exception if another deployment occurs while we wait.
- * @param {Object} {Id, ETag} 
- * @return true
- * @throws Error
- */
-const isDistributionDeployed = async ({ Id, ETag }) => {
-    const sleepInterval = 15; // seconds
-    let waitTime = 60 * 20; // 20 minute max wait
-    while ((waitTime -= sleepInterval) >= 0) {
-        await sleep(sleepInterval);
-        console.log(new Date().toJSON(), `Checking if distribution is deployed`, { Id, ETag, waitTime });
-        const result = await cloudfront.getDistribution({ Id }).promise();
-        if (result.ETag !== ETag) {
-            throw new Error('Whoops! It looks like someone else deployed while we were waiting for CloudFront to update.');
-        }
-
-        if (result.Distribution.Status === 'Deployed') {
-            console.log('Distribution deployed!');
-            return true;
-        }
-
-    }
-
-    throw new Error(`Failed to deploy. Distribution took too long to update.`, { Id, ETag });
+const apiKey = core.getInput('apiKey');
+const repoConfig = {
+    repositories: [{
+        type: "composer",
+        url: "https://packages.speareducation.com/composer",
+        options: { http: { header: [ `x-api-key: ${apiKey}` ] } }
+    }]
 }
+
+fs.writeFileSync('~/.composer/config.json', JSON.stringify(repoConfig))
+
 
 /**
  * Main handler
  */
 const handle = async () => {
+
+
+
+
+
+
+
+
     const distributions = JSON.parse(core.getInput('distributions'));
     const originId = core.getInput('originId');
     const project = github.context.repo.repo || null;
