@@ -1,5 +1,5 @@
-const core = require('@actions/core');
 // const github = require('@actions/github');
+const core = require('@actions/core');
 const fs = require('fs');
 
 const apiKey = core.getInput('apiKey');
@@ -16,4 +16,4 @@ composerConfig.repositories.push({
     options: { http: { header: [ `x-api-key: ${apiKey}` ] } }
 });
 
-fs.writeFileSync('composer.json', JSON.stringify(repoConfig));
+fs.writeFileSync('composer.json', JSON.stringify(composerConfig));
