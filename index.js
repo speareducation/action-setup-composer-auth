@@ -16,4 +16,7 @@ composerConfig.repositories.push({
     options: { http: { header: [ `x-api-key: ${apiKey}` ] } }
 });
 
+console.log('Updating composer.json');
+console.log(composerConfig);
+
 fs.writeFileSync('composer.json', JSON.stringify(composerConfig));
