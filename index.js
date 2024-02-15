@@ -17,6 +17,6 @@ composerConfig.repositories.push({
 });
 
 console.log('Updating composer.json');
-console.log(composerConfig);
+console.log(JSON.stringify(composerConfig, null, 2));
 
 fs.writeFileSync('composer.json', JSON.stringify(composerConfig));
